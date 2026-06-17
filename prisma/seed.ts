@@ -30,7 +30,7 @@ async function main() {
   })
 
   console.log('Seed complete.')
-  console.log('Login: admin@pctechnz.co.nz / changeme123')
+  console.log('Login: admin@pctechnz.co.nz (default password — change in /settings)')
   console.log('⚠️  Change this password in /settings after first login.')
 }
 
