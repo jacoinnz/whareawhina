@@ -24,7 +24,7 @@ export default async function ProposalPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-3xl mx-auto space-y-0">
+      <div className="max-w-3xl mx-auto">
         <ProposalHeader brand={brand} />
 
         <div className="bg-white shadow-sm px-8 py-6 space-y-8">

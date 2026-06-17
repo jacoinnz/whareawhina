@@ -3,16 +3,18 @@ import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { acceptQuote, declineQuote } from '@/app/proposals/[token]/actions'
 import { useRouter } from 'next/navigation'
+import type { QuoteStatus } from '@prisma/client'
 
 type Props = {
   token: string
-  status: string
+  status: QuoteStatus
 }
 
 export function ProposalActions({ token, status }: Props) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [localStatus, setLocalStatus] = useState(status)
+  const [acceptPending, startAccept] = useTransition()
+  const [declinePending, startDecline] = useTransition()
+  const [localStatus, setLocalStatus] = useState<QuoteStatus>(status)
 
   if (localStatus === 'ACCEPTED') {
     return (
@@ -33,7 +35,7 @@ export function ProposalActions({ token, status }: Props) {
   }
 
   function handleAccept() {
-    startTransition(async () => {
+    startAccept(async () => {
       await acceptQuote(token)
       setLocalStatus('ACCEPTED')
       router.push(`/proposals/${token}/done?result=accepted`)
@@ -41,7 +43,7 @@ export function ProposalActions({ token, status }: Props) {
   }
 
   function handleDecline() {
-    startTransition(async () => {
+    startDecline(async () => {
       await declineQuote(token)
       setLocalStatus('DECLINED')
       router.push(`/proposals/${token}/done?result=declined`)
@@ -52,20 +54,20 @@ export function ProposalActions({ token, status }: Props) {
     <div className="flex gap-4 justify-center pt-4">
       <Button
         onClick={handleAccept}
-        disabled={isPending}
+        disabled={acceptPending || declinePending}
         className="bg-green-600 hover:bg-green-700 text-white px-8"
         size="lg"
       >
-        {isPending ? 'Processing…' : 'Accept Quote'}
+        {acceptPending ? 'Accepting…' : 'Accept Quote'}
       </Button>
       <Button
         onClick={handleDecline}
-        disabled={isPending}
+        disabled={acceptPending || declinePending}
         variant="outline"
         className="border-red-300 text-red-600 hover:bg-red-50 px-8"
         size="lg"
       >
-        {isPending ? 'Processing…' : 'Decline Quote'}
+        {declinePending ? 'Declining…' : 'Decline Quote'}
       </Button>
     </div>
   )

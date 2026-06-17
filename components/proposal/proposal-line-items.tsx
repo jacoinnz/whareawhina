@@ -1,7 +1,7 @@
 import type { LineItem } from '@prisma/client'
 import { subtotal, gst, totalWithGst, formatCurrency, lineItemTotal } from '@/lib/pricing'
 
-function LineTable({
+export function LineTable({
   title,
   items,
   perSuffix,
