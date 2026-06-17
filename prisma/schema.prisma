@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  hashedPassword String
+  quotes         Quote[]
+  createdAt      DateTime @default(now())
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  name        String
+  contactName String
+  email       String
+  phone       String?
+  address     String?
+  quotes      Quote[]
+  createdAt   DateTime @default(now())
+}
+
+model Quote {
+  id          String      @id @default(cuid())
+  quoteNumber String      @unique
+  title       String
+  status      QuoteStatus @default(DRAFT)
+  token       String      @unique
+  notes       String?
+  terms       String?
+  sentAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  client      Client      @relation(fields: [clientId], references: [id])
+  clientId    String
+  author      User        @relation(fields: [authorId], references: [id])
+  authorId    String
+  lineItems   LineItem[]
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
+model LineItem {
+  id          String       @id @default(cuid())
+  type        LineItemType
+  description String
+  quantity    Decimal      @db.Decimal(10, 2)
+  unitPrice   Decimal      @db.Decimal(10, 2)
+  sortOrder   Int          @default(0)
+  quote       Quote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId     String
+}
+
+enum LineItemType {
+  ONE_OFF
+  RECURRING
+}
+
+model BrandSettings {
+  id           String  @id @default("singleton")
+  logoUrl      String?
+  primaryColor String  @default("#0066CC")
+  companyName  String  @default("PCTECHNZ")
+  phone        String?
+  email        String?
+  address      String?
+  website      String?
+  notifyEmail  String?
+  defaultTerms String?
+}
