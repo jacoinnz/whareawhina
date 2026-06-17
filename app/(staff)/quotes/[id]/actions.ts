@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { nextQuoteNumber, generateToken } from '@/lib/quotes'
 import { revalidatePath } from 'next/cache'
 import type { LineItemData } from '@/components/quote-builder/line-items-table'
+import { sendProposalEmail } from '@/lib/email'
 
 type SaveQuoteInput = {
   id: string
@@ -84,7 +85,24 @@ export async function sendToClient(quoteId: string): Promise<{ error?: string }>
     data: { status: 'SENT', sentAt: new Date() },
   })
 
-  // Email sending will be wired in Task 10
+  const brand = await prisma.brandSettings.findUnique({ where: { id: 'singleton' } })
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+  try {
+    await sendProposalEmail({
+      to: quote.client.email,
+      clientName: quote.client.name,
+      quoteNumber: quote.quoteNumber,
+      quoteTitle: quote.title,
+      proposalUrl: `${appUrl}/proposals/${quote.token}`,
+      companyName: brand?.companyName ?? 'PCTECHNZ',
+      primaryColor: brand?.primaryColor ?? '#0066CC',
+    })
+  } catch (err) {
+    console.error('Failed to send proposal email:', err)
+    // Don't block — status is already SENT
+  }
+
   revalidatePath(`/quotes/${quoteId}`)
   revalidatePath('/dashboard')
   return {}
